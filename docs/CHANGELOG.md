@@ -1,4 +1,3 @@
-```markdown
 # Changelog
 
 ## v1.0.0 (2025-01-15)
@@ -22,4 +21,3 @@
 - Zero configuration
 - Recursive crawling
 - Multi-threaded scanning
-```
