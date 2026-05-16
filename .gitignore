@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.pyd
+*.c
+*.pyx.c
+*.egg-info/
+build/
+dist/
+
+# Output
+output/
+*.json
+*.html
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Secrets
+*.pem
+*.key
+.env
+
+# OS
+.DS_Store
+Thumbs.db
