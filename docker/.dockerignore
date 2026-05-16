@@ -1,0 +1,13 @@
+__pycache__
+*.pyc
+*.so
+*.pyd
+build/
+dist/
+output/
+.git
+.gitignore
+README.md
+*.md
+tests/
+docs/
