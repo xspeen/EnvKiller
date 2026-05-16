@@ -1,0 +1,5 @@
+[✗] Fail
+[✗✗] Error
+[✗✗✗] Critical
+[✗✗✗✗] Abort
+[✗✗✗✗✗] Terminated
