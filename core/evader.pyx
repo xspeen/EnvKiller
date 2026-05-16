@@ -1,12 +1,12 @@
-# core/bypass.pyx
-# WAF and bot detection bypass
+# core/evader.pyx
+# WAF and bot detection evader
 # MADE BY XSPEEN
 
 import random
 import time
 import requests
 
-cdef class BypassEngine:
+cdef class EvaderEngine:
     cdef list user_agents
     cdef int request_count
     
@@ -37,7 +37,7 @@ cdef class BypassEngine:
         }
     
     cpdef requests.Response get(self, str url, **kwargs):
-        """Make request with bypass"""
+        """Make request with evader"""
         time.sleep(random.uniform(0.5, 1.5))
         headers = self.get_headers()
         if 'headers' in kwargs:
