@@ -10,12 +10,12 @@ import json
 import subprocess
 import shutil
 import requests
+from urllib.parse import urlparse
 from colorama import Fore, Style, init
 from .scanner import SecretScanner
 from .worm import WormCrawler
 from .portscanner import PortScanner
 from .subdomainfinder import SubdomainFinder
-from .dirbrute import DirBruteForcer
 from .evader import EvaderEngine
 
 init(autoreset=True)
@@ -29,7 +29,6 @@ cdef class EnvKillerEngine:
     cdef object crawler
     cdef object port_scanner
     cdef object subdomain_finder
-    cdef object dir_bruter
     cdef object evader
     
     def __cinit__(self):
@@ -41,7 +40,6 @@ cdef class EnvKillerEngine:
         self.crawler = WormCrawler()
         self.port_scanner = PortScanner()
         self.subdomain_finder = SubdomainFinder()
-        self.dir_bruter = DirBruteForcer()
         self.evader = EvaderEngine()
     
     cpdef start(self):
@@ -57,7 +55,7 @@ cdef class EnvKillerEngine:
         print(f"{Fore.GREEN}[+] Target: {self.target}{Style.RESET_ALL}")
         print(f"{Fore.CYAN}[+] Scan ID: {self.scan_id}{Style.RESET_ALL}")
         
-        target_type = self._detect_target_type()
+        cdef str target_type = self._detect_target_type()
         print(f"{Fore.CYAN}[+] Target type: {target_type}{Style.RESET_ALL}")
         
         self._run_scanner(target_type)
@@ -66,7 +64,7 @@ cdef class EnvKillerEngine:
     
     cdef str _detect_target_type(self):
         """Detect what type of target was provided"""
-        t = self.target.lower()
+        cdef str t = self.target.lower()
         
         if 'github.com' in t:
             return 'github'
@@ -113,9 +111,9 @@ cdef class EnvKillerEngine:
         """Scan GitHub repository"""
         print(f"{Fore.CYAN}[+] Scanning GitHub repository...{Style.RESET_ALL}")
         
-        clone_dir = os.path.join(self.output_dir, 'repo')
+        cdef str clone_dir = os.path.join(self.output_dir, 'repo')
         
-        result = subprocess.run(
+        cdef object result = subprocess.run(
             ['git', 'clone', '--depth', '1', self.target, clone_dir],
             capture_output=True, text=True
         )
@@ -126,7 +124,7 @@ cdef class EnvKillerEngine:
         
         print(f"{Fore.GREEN}[+] Repository cloned to {clone_dir}{Style.RESET_ALL}")
         
-        findings = self.scanner.scan_directory(clone_dir)
+        cdef list findings = self.scanner.scan_directory(clone_dir)
         self.results.extend(findings)
         
         shutil.rmtree(clone_dir, ignore_errors=True)
@@ -137,9 +135,9 @@ cdef class EnvKillerEngine:
         """Scan GitLab repository"""
         print(f"{Fore.CYAN}[+] Scanning GitLab repository...{Style.RESET_ALL}")
         
-        clone_dir = os.path.join(self.output_dir, 'repo')
+        cdef str clone_dir = os.path.join(self.output_dir, 'repo')
         
-        result = subprocess.run(
+        cdef object result = subprocess.run(
             ['git', 'clone', '--depth', '1', self.target, clone_dir],
             capture_output=True, text=True
         )
@@ -148,7 +146,7 @@ cdef class EnvKillerEngine:
             print(f"{Fore.RED}[!] Git clone failed{Style.RESET_ALL}")
             return
         
-        findings = self.scanner.scan_directory(clone_dir)
+        cdef list findings = self.scanner.scan_directory(clone_dir)
         self.results.extend(findings)
         shutil.rmtree(clone_dir, ignore_errors=True)
         
@@ -158,9 +156,9 @@ cdef class EnvKillerEngine:
         """Scan Bitbucket repository"""
         print(f"{Fore.CYAN}[+] Scanning Bitbucket repository...{Style.RESET_ALL}")
         
-        clone_dir = os.path.join(self.output_dir, 'repo')
+        cdef str clone_dir = os.path.join(self.output_dir, 'repo')
         
-        result = subprocess.run(
+        cdef object result = subprocess.run(
             ['git', 'clone', '--depth', '1', self.target, clone_dir],
             capture_output=True, text=True
         )
@@ -169,7 +167,7 @@ cdef class EnvKillerEngine:
             print(f"{Fore.RED}[!] Git clone failed{Style.RESET_ALL}")
             return
         
-        findings = self.scanner.scan_directory(clone_dir)
+        cdef list findings = self.scanner.scan_directory(clone_dir)
         self.results.extend(findings)
         shutil.rmtree(clone_dir, ignore_errors=True)
         
@@ -179,13 +177,13 @@ cdef class EnvKillerEngine:
         """Scan Pastebin URL"""
         print(f"{Fore.CYAN}[+] Scanning Pastebin...{Style.RESET_ALL}")
         
-        paste_id = self.target.split('/')[-1]
-        raw_url = f"https://pastebin.com/raw/{paste_id}"
+        cdef str paste_id = self.target.split('/')[-1]
+        cdef str raw_url = f"https://pastebin.com/raw/{paste_id}"
         
         try:
-            response = self.evader.get(raw_url, timeout=10)
+            cdef object response = self.evader.get(raw_url, {'timeout': 10})
             if response.status_code == 200:
-                findings = self.scanner.scan_text(response.text, self.target)
+                cdef list findings = self.scanner.scan_text(response.text, self.target)
                 self.results.extend(findings)
                 print(f"{Fore.GREEN}[+] Pastebin scan complete. Found {len(findings)} secrets.{Style.RESET_ALL}")
             else:
@@ -198,10 +196,10 @@ cdef class EnvKillerEngine:
         print(f"{Fore.CYAN}[+] Downloading file...{Style.RESET_ALL}")
         
         try:
-            response = self.evader.get(self.target, timeout=15)
+            cdef object response = self.evader.get(self.target, {'timeout': 15})
             if response.status_code == 200:
-                filename = os.path.basename(self.target.split('?')[0])
-                filepath = os.path.join(self.output_dir, filename)
+                cdef str filename = os.path.basename(self.target.split('?')[0])
+                cdef str filepath = os.path.join(self.output_dir, filename)
                 
                 with open(filepath, 'wb') as f:
                     f.write(response.content)
@@ -209,8 +207,8 @@ cdef class EnvKillerEngine:
                 print(f"{Fore.GREEN}[+] File saved: {filepath}{Style.RESET_ALL}")
                 
                 if filename.endswith(('.txt', '.env', '.json', '.yaml', '.yml', '.xml', '.conf', '.ini')):
-                    content = response.text
-                    findings = self.scanner.scan_text(content, self.target)
+                    cdef str content = response.text
+                    cdef list findings = self.scanner.scan_text(content, self.target)
                     self.results.extend(findings)
                     print(f"{Fore.GREEN}[+] Found {len(findings)} secrets.{Style.RESET_ALL}")
             else:
@@ -222,25 +220,26 @@ cdef class EnvKillerEngine:
         """Scan website with worm crawling"""
         print(f"{Fore.CYAN}[+] Scanning website with worm crawler...{Style.RESET_ALL}")
         
-        pages = self.crawler.crawl(self.target)
+        cdef list pages = self.crawler.crawl(self.target)
         print(f"{Fore.GREEN}[+] Crawled {len(pages)} pages{Style.RESET_ALL}")
         
+        cdef dict page
         for page in pages:
             try:
-                response = self.evader.get(page['url'], timeout=10)
+                cdef object response = self.evader.get(page['url'], {'timeout': 10})
                 if response.status_code == 200:
-                    findings = self.scanner.scan_text(response.text, page['url'])
+                    cdef list findings = self.scanner.scan_text(response.text, page['url'])
                     self.results.extend(findings)
             except Exception:
                 pass
         
-        from urllib.parse import urlparse
-        parsed = urlparse(self.target)
-        domain = parsed.netloc or parsed.path
+        cdef object parsed = urlparse(self.target)
+        cdef str domain = parsed.netloc or parsed.path
         
         if domain and '.' in domain:
             print(f"{Fore.CYAN}[+] Running port scan on {domain}...{Style.RESET_ALL}")
-            open_ports = self.port_scanner.scan(domain, full=False)
+            cdef list open_ports = self.port_scanner.scan(domain, False)
+            cdef dict port_info
             for port_info in open_ports:
                 self.results.append({
                     'type': 'OPEN_PORT',
@@ -248,26 +247,17 @@ cdef class EnvKillerEngine:
                     'source': domain,
                     'severity': 'MEDIUM'
                 })
-        
-        print(f"{Fore.CYAN}[+] Running subdomain discovery...{Style.RESET_ALL}")
-        subdomains = self.subdomain_finder.find(domain)
-        for sub in subdomains:
-            self.results.append({
-                'type': 'SUBDOMAIN',
-                'value': sub['full'],
-                'source': domain,
-                'severity': 'INFO'
-            })
-        
-        print(f"{Fore.CYAN}[+] Running directory brute force...{Style.RESET_ALL}")
-        directories = self.dir_bruter.brute(self.target)
-        for d in directories:
-            self.results.append({
-                'type': 'DIRECTORY',
-                'value': d['path'],
-                'source': d['url'],
-                'severity': 'MEDIUM' if d['status'] == 200 else 'INFO'
-            })
+            
+            print(f"{Fore.CYAN}[+] Running subdomain discovery...{Style.RESET_ALL}")
+            cdef list subdomains = self.subdomain_finder.find(domain)
+            cdef dict sub
+            for sub in subdomains:
+                self.results.append({
+                    'type': 'SUBDOMAIN',
+                    'value': sub['full'],
+                    'source': domain,
+                    'severity': 'INFO'
+                })
         
         print(f"{Fore.GREEN}[+] Website scan complete. Total findings: {len(self.results)}{Style.RESET_ALL}")
     
@@ -275,7 +265,8 @@ cdef class EnvKillerEngine:
         """Scan IP address"""
         print(f"{Fore.CYAN}[+] Scanning IP address...{Style.RESET_ALL}")
         
-        open_ports = self.port_scanner.scan(self.target, full=False)
+        cdef list open_ports = self.port_scanner.scan(self.target, False)
+        cdef dict port_info
         
         for port_info in open_ports:
             self.results.append({
@@ -290,6 +281,8 @@ cdef class EnvKillerEngine:
     cdef void _scan_local_file(self):
         """Scan local file or directory"""
         print(f"{Fore.CYAN}[+] Scanning local path...{Style.RESET_ALL}")
+        
+        cdef list findings
         
         if os.path.isfile(self.target):
             findings = self.scanner.scan_file(self.target)
@@ -315,8 +308,15 @@ cdef class EnvKillerEngine:
             print(f"{Fore.RED}{'TYPE':<20} {'FINDING':<35} {'SEVERITY':<12} {'SOURCE'}{Style.RESET_ALL}")
             print(f"{Fore.CYAN}{'-'*80}{Style.RESET_ALL}")
             
+            cdef dict r
+            cdef str severity_color
             for r in self.results[:50]:
-                severity_color = Fore.RED if r.get('severity') == 'CRITICAL' else Fore.YELLOW if r.get('severity') == 'HIGH' else Fore.WHITE
+                if r.get('severity') == 'CRITICAL':
+                    severity_color = Fore.RED
+                elif r.get('severity') == 'HIGH':
+                    severity_color = Fore.YELLOW
+                else:
+                    severity_color = Fore.WHITE
                 print(f"{r.get('type', 'UNKNOWN'):<20} {r.get('value', 'N/A')[:35]:<35} {severity_color}{r.get('severity', 'INFO'):<12}{Style.RESET_ALL} {r.get('source', 'N/A')[:40]}")
         
         print(f"{Fore.CYAN}{'='*80}{Style.RESET_ALL}")
@@ -325,7 +325,7 @@ cdef class EnvKillerEngine:
     cdef void _save_reports(self):
         """Save results to JSON and HTML"""
         
-        json_path = os.path.join(self.output_dir, 'report.json')
+        cdef str json_path = os.path.join(self.output_dir, 'report.json')
         with open(json_path, 'w') as f:
             json.dump({
                 'target': self.target,
@@ -335,8 +335,8 @@ cdef class EnvKillerEngine:
             }, f, indent=2)
         print(f"{Fore.GREEN}[+] JSON report saved: {json_path}{Style.RESET_ALL}")
         
-        html_path = os.path.join(self.output_dir, 'report.html')
-        html_content = f"""<!DOCTYPE html>
+        cdef str html_path = os.path.join(self.output_dir, 'report.html')
+        cdef str html_content = f"""<!DOCTYPE html>
 <html>
 <head>
     <title>EnvKiller Report - {self.target}</title>
@@ -360,6 +360,7 @@ cdef class EnvKillerEngine:
     <table>
         <tr><th>TYPE</th><th>FINDING</th><th>SEVERITY</th><th>SOURCE</th></tr>"""
         
+        cdef dict r
         for r in self.results:
             html_content += f"""
         <tr>
