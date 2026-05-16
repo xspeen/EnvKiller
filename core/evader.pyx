@@ -7,6 +7,14 @@ import time
 import requests
 import platform
 
+# Simple response class defined at module level
+class EmptyResponse:
+    __slots__ = ['status_code', 'text', 'content']
+    def __init__(self, status_code):
+        self.status_code = status_code
+        self.text = ""
+        self.content = b""
+
 cdef class EvaderEngine:
     cdef list user_agents
     cdef int request_count
@@ -76,20 +84,11 @@ cdef class EvaderEngine:
         try:
             return requests.get(url, headers=req_headers, timeout=timeout, allow_redirects=allow_redirects)
         except requests.exceptions.Timeout:
-            return self._empty_response(408)
+            return EmptyResponse(408)
         except requests.exceptions.ConnectionError:
-            return self._empty_response(503)
+            return EmptyResponse(503)
         except Exception:
-            return self._empty_response(500)
-    
-    cpdef object _empty_response(self, int status_code):
-        class EmptyResponse:
-            pass
-        resp = EmptyResponse()
-        resp.status_code = status_code
-        resp.text = ""
-        resp.content = b""
-        return resp
+            return EmptyResponse(500)
     
     cpdef int get_count(self):
         return self.request_count
