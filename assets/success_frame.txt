@@ -1,0 +1,5 @@
+[✓] Done
+[✓✓] Complete
+[✓✓✓] Success
+[✓✓✓✓] Finished
+[✓✓✓✓✓] Ready
