@@ -5,13 +5,16 @@
 import random
 import time
 import requests
+import platform
 
 cdef class EvaderEngine:
     cdef list user_agents
     cdef int request_count
+    cdef str os_type
     
     def __cinit__(self):
         self.request_count = 0
+        self.os_type = platform.system().lower()
         
         self.user_agents = [
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0',
@@ -32,13 +35,15 @@ cdef class EvaderEngine:
             'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
             'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/121.0',
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/118.0.5993.88',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/122.0.0.0',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/122.0.0.0',
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/122.0.0.0',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0',
         ]
     
     cpdef dict get_headers(self):
-        """Get randomized headers for bot evasion"""
         self.request_count += 1
-        
-        cdef str random_ip = f"{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}"
+        random_ip = f"{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}"
         
         return {
             'User-Agent': random.choice(self.user_agents),
@@ -60,14 +65,10 @@ cdef class EvaderEngine:
             'X-Remote-Addr': random_ip,
         }
     
-    cpdef object get(self, str url, dict kwargs=None):
-        """Make GET request with evasion techniques"""
-        if kwargs is None:
-            kwargs = {}
-        
+    cpdef object get(self, str url, **kwargs):
         time.sleep(random.uniform(0.5, 3.0))
         
-        cdef dict headers = self.get_headers()
+        headers = self.get_headers()
         if 'headers' in kwargs:
             headers.update(kwargs['headers'])
         kwargs['headers'] = headers
@@ -78,39 +79,23 @@ cdef class EvaderEngine:
         try:
             return requests.get(url, **kwargs)
         except requests.exceptions.Timeout:
-            return type('Response', (), {'status_code': 408, 'text': '', 'content': b''})()
+            return self._empty_response(408)
         except requests.exceptions.ConnectionError:
-            return type('Response', (), {'status_code': 503, 'text': '', 'content': b''})()
+            return self._empty_response(503)
         except Exception:
-            return type('Response', (), {'status_code': 500, 'text': '', 'content': b''})()
+            return self._empty_response(500)
     
-    cpdef object post(self, str url, dict data=None, dict kwargs=None):
-        """Make POST request with evasion techniques"""
-        if kwargs is None:
-            kwargs = {}
-        
-        time.sleep(random.uniform(0.5, 3.0))
-        
-        cdef dict headers = self.get_headers()
-        if 'headers' in kwargs:
-            headers.update(kwargs['headers'])
-        kwargs['headers'] = headers
-        
-        if 'timeout' not in kwargs:
-            kwargs['timeout'] = 15
-        
-        try:
-            if data:
-                return requests.post(url, data=data, **kwargs)
-            else:
-                return requests.post(url, **kwargs)
-        except Exception:
-            return type('Response', (), {'status_code': 500, 'text': '', 'content': b''})()
+    cpdef object _empty_response(self, int status_code):
+        class EmptyResponse:
+            pass
+        resp = EmptyResponse()
+        resp.status_code = status_code
+        resp.text = ""
+        resp.content = b""
+        return resp
     
     cpdef int get_count(self):
-        """Return total request count"""
         return self.request_count
     
     cpdef void reset_count(self):
-        """Reset request counter"""
         self.request_count = 0
