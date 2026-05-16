@@ -1,12 +1,44 @@
-requests
-colorama
-beautifulsoup4
-lxml
-urllib3
-cython
-cryptography
-setuptools
-gitpython
-dnspython
-fake-useragent
-cloudscraper
+# EnvKiller Core Requirements
+# MADE BY XSPEEN
+
+# HTTP & Networking
+requests>=2.31.0
+urllib3>=2.0.0
+cloudscraper>=1.2.71
+
+# HTML Parsing
+beautifulsoup4>=4.12.0
+lxml>=5.0.0
+
+# Security & Cryptography
+cryptography>=42.0.0
+
+# Cython for Obfuscation
+cython>=3.0.0
+setuptools>=65.0.0
+
+# Git Operations
+gitpython>=3.1.40
+
+# DNS & Subdomain Discovery
+dnspython>=2.4.0
+
+# OSINT & Recon
+python-whois>=0.8.0
+phonenumbers>=8.13.0
+
+# Utilities
+colorama>=0.4.6
+fake-useragent>=1.4.0
+tqdm>=4.66.0
+psutil>=5.9.0
+pyinstaller>=6.0.0
+
+# Terminal Styling
+termcolor>=2.3.0
+
+# JSON & Data Processing
+json5>=0.9.0
+
+# Concurrency
+concurrent-futures>=3.1.1
