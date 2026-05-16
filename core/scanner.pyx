@@ -45,18 +45,30 @@ cdef class SecretScanner:
     cpdef list scan_text(self, str text, str source):
         """Scan text for secrets"""
         self.findings = []
+        cdef list matches
+        cdef str match_str
+        cdef str severity
+        
         for name, pattern in self.patterns.items():
             matches = re.findall(pattern, text)
             for match in matches:
                 if isinstance(match, tuple):
-                    match = match[0] if match[0] else match[1]
+                    match_str = match[0] if match[0] else match[1]
+                else:
+                    match_str = match
+                
+                if name in ['AWS_ACCESS_KEY', 'AWS_SECRET_KEY', 'GITHUB_TOKEN', 'OPENAI_KEY', 'STRIPE_LIVE']:
+                    severity = 'CRITICAL'
+                else:
+                    severity = 'HIGH'
+                
                 self.findings.append({
                     'type': name,
-                    'value': match[:40] + '...' if len(match) > 40 else match,
+                    'value': match_str[:40] + '...' if len(match_str) > 40 else match_str,
                     'source': source,
-                    'severity': 'CRITICAL' if name in ['AWS_ACCESS_KEY', 'AWS_SECRET_KEY', 'GITHUB_TOKEN', 'OPENAI_KEY', 'STRIPE_LIVE'] else 'HIGH'
+                    'severity': severity
                 })
-                print(f"  {Fore.RED}[!] {name}: {match[:30]}...{Style.RESET_ALL}")
+                print(f"  {Fore.RED}[!] {name}: {match_str[:30]}...{Style.RESET_ALL}")
         return self.findings
     
     cpdef list scan_file(self, str filepath):
@@ -70,7 +82,11 @@ cdef class SecretScanner:
     
     cpdef list scan_directory(self, str path):
         """Scan all files in directory recursively"""
-        all_findings = []
+        cdef list all_findings = []
+        cdef str root, file, ext, full_path
+        cdef list dirs, files
+        cdef list findings
+        
         for root, dirs, files in os.walk(path):
             for file in files:
                 ext = os.path.splitext(file)[1].lower()
