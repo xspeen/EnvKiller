@@ -1,0 +1,6 @@
+AKIAIOSFODNN7EXAMPLE
+ghp_aBcDeFgHiJkLmNoPqRsTuVwXyZ1234
+sk-aBcDeFgHiJkLmNoPqRsTuVwXyZ1234567890AbCdEf
+sk_live_1234567890abcdefghijklmnopqrstuv
+mongodb://admin:password@10.0.0.1:27017/admin
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
