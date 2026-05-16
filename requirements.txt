@@ -31,14 +31,9 @@ phonenumbers>=8.13.0
 colorama>=0.4.6
 fake-useragent>=1.4.0
 tqdm>=4.66.0
-psutil>=5.9.0
-pyinstaller>=6.0.0
 
 # Terminal Styling
 termcolor>=2.3.0
 
 # JSON & Data Processing
 json5>=0.9.0
-
-# Concurrency
-concurrent-futures>=3.1.1
