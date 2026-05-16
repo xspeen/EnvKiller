@@ -5,4 +5,4 @@ from .worm import WormCrawler
 from .port_scanner import PortScanner
 from .subdomain import SubdomainFinder
 from .dir_brute import DirBruteForcer
-from .bypass import BypassEngine
+from .evader import BypassEngine
