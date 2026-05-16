@@ -1,37 +1,13 @@
-# EnvKiller Requirements
-# MADE BY XSPEEN
-
-# Core
-requests==2.31.0
-colorama==0.4.6
-beautifulsoup4==4.12.3
-lxml==5.1.0
-urllib3==2.2.1
-
-# Security & Obfuscation
-cython==3.0.8
-cryptography==42.0.5
-pyinstaller==6.5.0
-
-# Networking
-dnspython==2.6.1
-python-nmap==0.7.1
-scapy==2.5.0
-paramiko==3.4.0
-sockets==1.0.0
-
-# OSINT
-whois==0.9.4
-phonenumbers==8.13.29
-python-whois==0.8.0
-
-# Git & Archives
-gitpython==3.1.41
-patool==1.12
-
-# Utilities
-tqdm==4.66.2
-fake-useragent==1.5.1
-cloudscraper==1.2.71
-pydantic==2.6.1
-psutil==5.9.8
+requests
+colorama
+beautifulsoup4
+lxml
+urllib3
+cython
+cryptography
+setuptools
+gitpython
+dnspython
+psutil
+fake-useragent
+cloudscraper
