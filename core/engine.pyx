@@ -4,6 +4,7 @@
 
 import sys
 import os
+import re
 import time
 import json
 import subprocess
@@ -12,9 +13,9 @@ import requests
 from colorama import Fore, Style, init
 from .scanner import SecretScanner
 from .worm import WormCrawler
-from .port_scanner import PortScanner
-from .subdomain import SubdomainFinder
-from .dir_brute import DirBruteForcer
+from .portscanner import PortScanner
+from .subdomainfinder import SubdomainFinder
+from .dirbrute import DirBruteForcer
 from .evader import EvaderEngine
 
 init(autoreset=True)
@@ -114,7 +115,6 @@ cdef class EnvKillerEngine:
         
         clone_dir = os.path.join(self.output_dir, 'repo')
         
-        # Clone repository
         result = subprocess.run(
             ['git', 'clone', '--depth', '1', self.target, clone_dir],
             capture_output=True, text=True
@@ -126,11 +126,9 @@ cdef class EnvKillerEngine:
         
         print(f"{Fore.GREEN}[+] Repository cloned to {clone_dir}{Style.RESET_ALL}")
         
-        # Scan the cloned directory
         findings = self.scanner.scan_directory(clone_dir)
         self.results.extend(findings)
         
-        # Cleanup
         shutil.rmtree(clone_dir, ignore_errors=True)
         
         print(f"{Fore.GREEN}[+] GitHub scan complete. Found {len(findings)} secrets.{Style.RESET_ALL}")
@@ -224,11 +222,9 @@ cdef class EnvKillerEngine:
         """Scan website with worm crawling"""
         print(f"{Fore.CYAN}[+] Scanning website with worm crawler...{Style.RESET_ALL}")
         
-        # Crawl the website
         pages = self.crawler.crawl(self.target)
         print(f"{Fore.GREEN}[+] Crawled {len(pages)} pages{Style.RESET_ALL}")
         
-        # Scan each page
         for page in pages:
             try:
                 response = self.evader.get(page['url'], timeout=10)
@@ -238,7 +234,6 @@ cdef class EnvKillerEngine:
             except Exception:
                 pass
         
-        # Port scan if domain
         from urllib.parse import urlparse
         parsed = urlparse(self.target)
         domain = parsed.netloc or parsed.path
@@ -254,7 +249,6 @@ cdef class EnvKillerEngine:
                     'severity': 'MEDIUM'
                 })
         
-        # Subdomain discovery
         print(f"{Fore.CYAN}[+] Running subdomain discovery...{Style.RESET_ALL}")
         subdomains = self.subdomain_finder.find(domain)
         for sub in subdomains:
@@ -265,7 +259,6 @@ cdef class EnvKillerEngine:
                 'severity': 'INFO'
             })
         
-        # Directory brute force
         print(f"{Fore.CYAN}[+] Running directory brute force...{Style.RESET_ALL}")
         directories = self.dir_bruter.brute(self.target)
         for d in directories:
@@ -332,7 +325,6 @@ cdef class EnvKillerEngine:
     cdef void _save_reports(self):
         """Save results to JSON and HTML"""
         
-        # JSON report
         json_path = os.path.join(self.output_dir, 'report.json')
         with open(json_path, 'w') as f:
             json.dump({
@@ -343,7 +335,6 @@ cdef class EnvKillerEngine:
             }, f, indent=2)
         print(f"{Fore.GREEN}[+] JSON report saved: {json_path}{Style.RESET_ALL}")
         
-        # HTML report
         html_path = os.path.join(self.output_dir, 'report.html')
         html_content = f"""<!DOCTYPE html>
 <html>
