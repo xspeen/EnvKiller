@@ -5,16 +5,13 @@
 import random
 import time
 import requests
-import platform
 
 cdef class EvaderEngine:
     cdef list user_agents
     cdef int request_count
-    cdef str os_type
     
     def __cinit__(self):
         self.request_count = 0
-        self.os_type = platform.system().lower()
         
         self.user_agents = [
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0',
@@ -38,8 +35,10 @@ cdef class EvaderEngine:
         ]
     
     cpdef dict get_headers(self):
+        """Get randomized headers for bot evasion"""
         self.request_count += 1
-        random_ip = f"{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}"
+        
+        cdef str random_ip = f"{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}"
         
         return {
             'User-Agent': random.choice(self.user_agents),
@@ -62,11 +61,13 @@ cdef class EvaderEngine:
         }
     
     cpdef object get(self, str url, dict kwargs=None):
+        """Make GET request with evasion techniques"""
         if kwargs is None:
             kwargs = {}
         
         time.sleep(random.uniform(0.5, 3.0))
-        headers = self.get_headers()
+        
+        cdef dict headers = self.get_headers()
         if 'headers' in kwargs:
             headers.update(kwargs['headers'])
         kwargs['headers'] = headers
@@ -75,8 +76,7 @@ cdef class EvaderEngine:
             kwargs['timeout'] = 15
         
         try:
-            response = requests.get(url, **kwargs)
-            return response
+            return requests.get(url, **kwargs)
         except requests.exceptions.Timeout:
             return type('Response', (), {'status_code': 408, 'text': '', 'content': b''})()
         except requests.exceptions.ConnectionError:
@@ -85,11 +85,13 @@ cdef class EvaderEngine:
             return type('Response', (), {'status_code': 500, 'text': '', 'content': b''})()
     
     cpdef object post(self, str url, dict data=None, dict kwargs=None):
+        """Make POST request with evasion techniques"""
         if kwargs is None:
             kwargs = {}
         
         time.sleep(random.uniform(0.5, 3.0))
-        headers = self.get_headers()
+        
+        cdef dict headers = self.get_headers()
         if 'headers' in kwargs:
             headers.update(kwargs['headers'])
         kwargs['headers'] = headers
@@ -99,15 +101,16 @@ cdef class EvaderEngine:
         
         try:
             if data:
-                response = requests.post(url, data=data, **kwargs)
+                return requests.post(url, data=data, **kwargs)
             else:
-                response = requests.post(url, **kwargs)
-            return response
+                return requests.post(url, **kwargs)
         except Exception:
             return type('Response', (), {'status_code': 500, 'text': '', 'content': b''})()
     
     cpdef int get_count(self):
+        """Return total request count"""
         return self.request_count
     
     cpdef void reset_count(self):
+        """Reset request counter"""
         self.request_count = 0
