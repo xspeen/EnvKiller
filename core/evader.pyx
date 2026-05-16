@@ -65,19 +65,16 @@ cdef class EvaderEngine:
             'X-Remote-Addr': random_ip,
         }
     
-    cpdef object get(self, str url, **kwargs):
+    cpdef object get(self, str url, timeout=15, headers=None, allow_redirects=False):
         time.sleep(random.uniform(0.5, 3.0))
         
-        headers = self.get_headers()
-        if 'headers' in kwargs:
-            headers.update(kwargs['headers'])
-        kwargs['headers'] = headers
-        
-        if 'timeout' not in kwargs:
-            kwargs['timeout'] = 15
+        req_headers = self.get_headers()
+        if headers is not None:
+            for key, value in headers.items():
+                req_headers[key] = value
         
         try:
-            return requests.get(url, **kwargs)
+            return requests.get(url, headers=req_headers, timeout=timeout, allow_redirects=allow_redirects)
         except requests.exceptions.Timeout:
             return self._empty_response(408)
         except requests.exceptions.ConnectionError:
