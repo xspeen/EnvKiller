@@ -5,9 +5,9 @@
 from .engine import EnvKillerEngine
 from .scanner import SecretScanner
 from .worm import WormCrawler
-from .port_scanner import PortScanner
-from .subdomain import SubdomainFinder
-from .dir_brute import DirBruteForcer
+from .portscanner import PortScanner
+from .subdomainfinder import SubdomainFinder
+from .dirbrute import DirBruteForcer
 from .evader import EvaderEngine
 
 __all__ = [
