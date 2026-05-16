@@ -8,6 +8,5 @@ cryptography
 setuptools
 gitpython
 dnspython
-psutil
 fake-useragent
 cloudscraper
